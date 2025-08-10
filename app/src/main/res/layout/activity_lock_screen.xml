@@ -1,37 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#FF000000"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:background="#FF000000">
 
-    <TextView
-        android:id="@+id/timeText"
-        android:textColor="#FFFFFF"
-        android:textSize="48sp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <!-- Full screen lock screen container -->
+    <RelativeLayout
+        android:id="@+id/lockScreenRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="24dp">
 
-    <TextView
-        android:id="@+id/mediaText"
-        android:textColor="#CCCCCC"
-        android:textSize="20sp"
-        android:layout_below="@id/timeText"
-        android:layout_marginTop="16dp"
-        android:layout_centerHorizontal="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <!-- Time -->
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:text="00:00"
+            android:textColor="#FFFFFF"
+            android:textSize="48sp" />
 
-    <Button
-        android:id="@+id/exitLockScreenBtn"
-        android:text="Exit Lock Screen"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <!-- Media info -->
+        <TextView
+            android:id="@+id/mediaText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/timeText"
+            android:layout_marginTop="16dp"
+            android:layout_centerHorizontal="true"
+            android:text="No media playing"
+            android:textColor="#CCCCCC"
+            android:textSize="20sp" />
 
-</RelativeLayout>
+        <!-- Exit button -->
+        <Button
+            android:id="@+id/exitLockScreenBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="40dp"
+            android:text="Exit Lock Screen" />
+    </RelativeLayout>
+</FrameLayout>

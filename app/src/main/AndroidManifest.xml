@@ -2,11 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Declare permissions here, outside the application tag -->
-    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"
-        tools:ignore="ManifestOrder,ProtectedPermissions,WrongManifestParent" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
+    <!-- Overlay + Foreground Service permissions -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +18,7 @@
         android:theme="@style/Theme.LockScreenVideoPlayer"
         tools:targetApi="31">
 
+        <!-- Main launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,31 +28,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".LockScreenActivity"
-            android:excludeFromRecents="true"
+            android:exported="true"
             android:showOnLockScreen="true"
             android:turnScreenOn="true"
-            android:exported="true"
             android:theme="@style/Theme.LockScreenVideoPlayer" />
 
-        <service
-            android:name=".MyNotificationListener"
-            android:label="Media Notification Listener"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service>
 
-        <!-- ADD THIS SERVICE DECLARATION -->
-        <service
-            android:name=".LockScreenOverlayService"
-            android:exported="false" />
 
+        <!-- Foreground service that controls overlay -->
+        <service
+            android:name=".LockScreenControlService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection|mediaPlayback"
+            tools:ignore="ForegroundServicePermission" />
     </application>
-
-
 </manifest>

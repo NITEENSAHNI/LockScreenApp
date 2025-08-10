@@ -1,93 +1,101 @@
 package com.example.lockscreenvideoplayer;
 
-import android.app.KeyguardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.media.session.MediaController;
-import android.media.session.MediaSessionManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class LockScreenActivity extends AppCompatActivity {
 
     private TextView timeText;
-    private TextView mediaText;
-    private final Handler handler = new Handler();
+    private Handler clockHandler = new Handler();
+    private float startY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Show on lock screen & keep screen on
+        // Show activity over lock screen
         getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
                         WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                         WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
 
-        // Disable default keyguard if API >= O
-        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            keyguardManager.requestDismissKeyguard(this, null);
-        }
-
         setContentView(R.layout.activity_lock_screen);
 
-        timeText = findViewById(R.id.timeText);
-        mediaText = findViewById(R.id.mediaText);
-        Button exitBtn = findViewById(R.id.exitLockScreenBtn);
+        // Apply immersive mode
+        enterImmersiveMode();
 
-        exitBtn.setOnClickListener(v -> {
-            finish(); // close overlay
+        timeText = findViewById(R.id.timeText);
+        startClock();
+
+        // Exit button
+        findViewById(R.id.exitLockScreenBtn).setOnClickListener(v -> finish());
+
+        // Swipe-up gesture anywhere on the main layout
+        findViewById(R.id.lockScreenRoot).setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    startY = event.getY();
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    float endY = event.getY();
+                    if (startY - endY > 150) { // Swipe up threshold
+                        finish();
+                        return true;
+                    }
+            }
+            return false;
         });
 
-        startClockUpdater();
-        startMediaUpdater();
+        // Reapply immersive mode if system UI changes
+        getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(
+                visibility -> enterImmersiveMode()
+        );
     }
 
-    private void startClockUpdater() {
-        handler.postDelayed(new Runnable() {
+    private void startClock() {
+        clockHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                String time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+                // Show hours and minutes; change to "HH:mm:ss" if you want seconds
+                String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
                 timeText.setText(time);
-                handler.postDelayed(this, 1000);
+                clockHandler.postDelayed(this, 1000);
             }
         }, 0);
     }
 
-    private void startMediaUpdater() {
-        MediaSessionManager mediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
-        if (mediaSessionManager != null) {
-            try {
-                List<MediaController> controllers = mediaSessionManager.getActiveSessions(null);
-                if (!controllers.isEmpty()) {
-                    MediaController controller = controllers.get(0);
-                    if (controller.getMetadata() != null) {
-                        String title = controller.getMetadata().getDescription().getTitle() != null
-                                ? controller.getMetadata().getDescription().getTitle().toString()
-                                : "No title";
-                        mediaText.setText(title);
-                        return;
-                    }
-                }
-                mediaText.setText("No active media");
-            } catch (SecurityException e) {
-                mediaText.setText("No permission to control media");
-            }
-        }
+    private void enterImmersiveMode() {
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                        View.SYSTEM_UI_FLAG_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        );
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        enterImmersiveMode();
+    }
+
+    @Override
+    protected void onDestroy() {
+        clockHandler.removeCallbacksAndMessages(null);
+        super.onDestroy();
     }
 }
