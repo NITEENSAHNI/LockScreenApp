@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,22 +34,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Show over lockscreen flags for this activity itself
-        getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-        );
-
-        // Disable default keyguard
-        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        if (keyguardManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            keyguardManager.requestDismissKeyguard(this, null);
-        }
-
         setContentView(R.layout.activity_main);
 
         timeText = findViewById(R.id.timeText);
@@ -61,13 +44,16 @@ public class MainActivity extends AppCompatActivity {
         checkNotificationPermissionAndStart();
         checkOverlayPermission();
 
+        // Disable keyguard (optional)
+        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        if (keyguardManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            keyguardManager.requestDismissKeyguard(this, null);
+        }
+
         lockScreenBtn.setOnClickListener(v -> {
             if (Settings.canDrawOverlays(this)) {
-                // Start your overlay service
                 startService(new Intent(this, LockScreenOverlayService.class));
-//                finish(); // Optional: close this activity to simulate lock
             } else {
-                // Request overlay permission
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, REQUEST_CODE_OVERLAY_PERMISSION);
@@ -97,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Re-check notification listener permission when user returns from settings
         if (isNotificationServiceEnabled()) {
             startMediaUpdater();
         }
