@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/timeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:textColor="@android:color/white"
+        android:textSize="48sp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp" />
+
+    <TextView
+        android:id="@+id/mediaText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No media"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:layout_below="@id/timeText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
+    <Button
+        android:id="@+id/lockScreenBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lock Screen"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/mediaText"
+        android:layout_marginTop="40dp" />
+
+
+</RelativeLayout>
